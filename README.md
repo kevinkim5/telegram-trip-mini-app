@@ -4,19 +4,23 @@ A powerful Telegram Mini App for tracking and planning trips with **cloud storag
 
 ## 🌟 What Makes This Special
 
-### ☁️ **Telegram Cloud Storage Integration**
-- All trip data stored in Telegram's secure cloud
-- Automatic sync across all your devices
-- No backend server or database needed
-- Data persists forever (as long as the bot exists)
+### ☁️ **Firebase Cloud Storage**
+
+- All trip data stored in Firebase Firestore
+- Real-time synchronization across all group members
+- Secure group-based access control
+- Automatic updates when any member makes changes
 
 ### 👥 **Group Collaboration**
+
 - Share trips with your Telegram group
 - Everyone can add, edit, and view trips
 - Perfect for planning group vacations together
 - Real-time updates for all members
+- Data isolated per group - each group has its own trip list
 
 ### 📱 **Full Feature Set**
+
 - Beautiful mobile-first interface
 - Countdown to next trip
 - Comprehensive flight tracking
@@ -26,6 +30,7 @@ A powerful Telegram Mini App for tracking and planning trips with **cloud storag
 ## Features in Detail
 
 ### Trip Management
+
 - Add, edit, and delete trips with ease
 - Automatic categorization into upcoming and past trips
 - Beautiful countdown timer to your next trip
@@ -33,7 +38,9 @@ A powerful Telegram Mini App for tracking and planning trips with **cloud storag
 - Refresh button to sync latest changes
 
 ### Flight Details
+
 Store comprehensive flight information:
+
 - Airline and flight number
 - Departure and arrival airports with codes
 - Terminal, gate, and seat information
@@ -41,7 +48,9 @@ Store comprehensive flight information:
 - Multiple flights per trip
 
 ### Detailed Itinerary
+
 Plan every moment with:
+
 - Activities, accommodations, transport, dining, and more
 - Specific dates, times, and locations
 - Descriptions and notes
@@ -56,8 +65,8 @@ Plan every moment with:
 - **Zustand** for state management
 - **date-fns** for date manipulation
 - **Lucide React** for icons
-- **Telegram Cloud Storage API** for data persistence
-- **LocalStorage** fallback for development
+- **Firebase Firestore** for real-time data persistence
+- **Firebase Authentication** for secure access
 
 ## Getting Started
 
@@ -75,7 +84,7 @@ npm run dev
 
 The app will be available at `http://localhost:5173`
 
-**Note:** Cloud storage only works when deployed as a Telegram Mini App. In development, the app uses localStorage as a fallback.
+**Note:** You need to set up Firebase before running the app. See [FIREBASE_SETUP.md](./FIREBASE_SETUP.md) for detailed instructions.
 
 ### Building for Production
 
@@ -87,48 +96,86 @@ The built files will be in the `dist` directory.
 
 ## Deployment & Setup
 
-### Quick Deploy (3 Steps)
+### Prerequisites
 
-1. **Deploy to a hosting platform:**
-   - Vercel (recommended): `vercel --prod`
-   - Netlify: Drag `dist` folder to netlify.com/drop
-   - GitHub Pages: See QUICKSTART.md
+1. **Set up Firebase** (required):
+
+   - Follow the complete guide in [FIREBASE_SETUP.md](./FIREBASE_SETUP.md)
+   - Create a Firebase project
+   - Enable Firestore and Anonymous Authentication
+   - Configure environment variables
 
 2. **Create Telegram Bot:**
    - Talk to [@BotFather](https://t.me/botfather)
    - `/newbot` → Create your bot
-   - `/newapp` → Add Mini App with your deployment URL
+   - `/newapp` → Add Mini App (you'll add the URL after deployment)
 
-3. **Test it:**
-   - Open your bot in Telegram
-   - Click the Mini App button
-   - Start tracking trips!
+### Deployment Steps
+
+1. **Configure Environment Variables:**
+
+   - Copy `.env.example` to `.env`
+   - Fill in your Firebase configuration values
+
+2. **Deploy to a hosting platform:**
+
+   - Vercel (recommended): `vercel --prod`
+   - Netlify: Connect your repo and add environment variables
+   - GitHub Pages: See deployment docs
+
+3. **Update Telegram Bot:**
+
+   - Get your deployment URL
+   - Use `/newapp` or `/editapp` with @BotFather
+   - Set the Mini App URL to your deployment
+
+4. **Deploy Firestore Rules:**
+   ```bash
+   firebase deploy --only firestore:rules
+   firebase deploy --only firestore:indexes
+   ```
 
 ### For Group Sharing
 
-See **[GROUP_SHARING.md](GROUP_SHARING.md)** for complete instructions on setting up group collaboration.
+1. **Enable group mode:**
 
-**Quick version:**
-1. Enable group mode: `/setjoingroups` with @BotFather
-2. Add your bot to a Telegram group
-3. Open the Mini App from the group chat
-4. All group members now share the same trip data!
+   - `/setjoingroups` with @BotFather
+   - Turn OFF "Group Privacy" in bot settings
+
+2. **Add bot to group:**
+
+   - Create or open a Telegram group
+   - Add your bot as a member
+
+3. **Open Mini App in group:**
+   - In the group chat, click on the bot
+   - Open the Mini App
+   - All group members now share the same trip data!
+
+**Note:** Each Telegram group has its own isolated trip data. Data from one group is not visible to members of other groups.
 
 ## How Data Storage Works
 
-### Individual Mode (Bot Chat)
-- Open Mini App through 1-on-1 bot chat
-- Your trips are **private** to you
-- Syncs across your devices
-- Perfect for personal travel tracking
+### Firebase Firestore
 
-### Group Mode (Group Chat)
-- Open Mini App in a Telegram group
-- All group members see **shared** trips
-- Collaborative planning and editing
-- Perfect for group vacations
+- All trip data is stored in Firebase Firestore
+- Real-time synchronization using Firestore listeners
+- Automatic updates when any group member makes changes
+- Secure access control based on Telegram group ID
 
-**Important:** The same bot can be used in both modes. Storage is separate based on context!
+### Group-Based Isolation
+
+- Each Telegram group has its own `groupId`
+- Trips are stored with the `groupId` field
+- Only members of the same group can see and edit trips
+- Data is completely isolated between different groups
+
+### Individual vs Group Mode
+
+- **Private Chat**: Uses `user_<userId>` as groupId - trips are private to that user
+- **Group Chat**: Uses `group_<chatId>` as groupId - trips are shared with all group members
+
+**Important:** The same bot can be used in multiple groups. Each group has completely separate trip data!
 
 ## Usage Guide
 
@@ -151,6 +198,7 @@ See **[GROUP_SHARING.md](GROUP_SHARING.md)** for complete instructions on settin
 ### Flight Information
 
 For each flight, you can store:
+
 - Airline name and flight number
 - Departure/arrival airports and codes
 - Departure/arrival times
@@ -160,6 +208,7 @@ For each flight, you can store:
 ### Itinerary Planning
 
 Build your day-by-day plan with:
+
 - **Activities**: Tours, sightseeing, events
 - **Accommodation**: Hotels, check-ins
 - **Transport**: Trains, car rentals
@@ -167,6 +216,7 @@ Build your day-by-day plan with:
 - **Other**: Miscellaneous items
 
 Each item includes:
+
 - Date and optional time
 - Title and description
 - Location information
@@ -203,6 +253,7 @@ src/
 ### Testing Cloud Storage Locally
 
 Cloud Storage only works in production. During development:
+
 - The app automatically uses localStorage
 - Data won't sync between devices
 - Deploy to test cloud storage features
@@ -219,6 +270,7 @@ Cloud Storage only works in production. During development:
 ### "Data not syncing between group members"
 
 **Check:**
+
 - Is everyone opening the app FROM the group chat?
 - Is the bot added to the group?
 - Are you all in the same group?
@@ -228,6 +280,7 @@ Cloud Storage only works in production. During development:
 ### "My personal trips disappeared"
 
 **This is normal!**
+
 - Personal trips (opened via bot chat) have separate storage from group trips
 - Switch contexts to see different trip lists
 - Both are preserved independently
@@ -241,6 +294,7 @@ Cloud Storage only works in production. During development:
 ## Future Enhancements
 
 Potential features to add:
+
 - [ ] Push notifications for trip updates
 - [ ] Activity log (who changed what)
 - [ ] Comments on trips/itinerary
@@ -263,21 +317,25 @@ Potential features to add:
 ## Security & Privacy
 
 ### What's Stored
+
 - Trip information (destinations, dates, descriptions)
 - Flight details (airlines, times, booking references)
 - Itinerary items (activities, locations, notes)
 
 ### Where It's Stored
+
 - **Production**: Telegram Cloud Storage (encrypted by Telegram)
 - **Development**: Browser localStorage
 - **Backup**: localStorage (in production too, as fallback)
 
 ### Who Can Access
+
 - **Individual mode**: Only you
 - **Group mode**: All group members
 - **Telegram**: Data stored on Telegram servers (standard encryption)
 
 ### Best Practices
+
 - Don't store highly sensitive info (passport numbers, credit cards)
 - Use booking references instead of full payment details
 - Trust your group members - they have full access in group mode
@@ -286,6 +344,7 @@ Potential features to add:
 ## Contributing
 
 This is an open-source project. Feel free to:
+
 - Fork and modify for your needs
 - Submit pull requests
 - Report issues

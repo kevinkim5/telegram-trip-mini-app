@@ -1,0 +1,49 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Helper function to get groupId from request
+    function getRequestGroupId() {
+      return request.resource.data.groupId != null
+        ? request.resource.data.groupId
+        : resource.data.groupId;
+    }
+
+    // Helper function to check if user is authenticated
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    // Trips collection rules
+    match /trips/{tripId} {
+      // Allow read if user is authenticated and trip belongs to their group
+      allow read: if isAuthenticated()
+        && resource.data.groupId != null;
+
+      // Allow create if user is authenticated and groupId matches
+      allow create: if isAuthenticated()
+        && request.resource.data.groupId != null
+        && request.resource.data.groupId is string
+        && request.resource.data.destination is string
+        && request.resource.data.startDate is string
+        && request.resource.data.endDate is string;
+
+      // Allow update if user is authenticated and groupId matches existing trip
+      allow update: if isAuthenticated()
+        && resource.data.groupId == request.resource.data.groupId
+        && request.resource.data.groupId != null
+        && request.resource.data.destination is string
+        && request.resource.data.startDate is string
+        && request.resource.data.endDate is string;
+
+      // Allow delete if user is authenticated and trip belongs to their group
+      allow delete: if isAuthenticated()
+        && resource.data.groupId != null;
+    }
+
+    // Deny all other access
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
+

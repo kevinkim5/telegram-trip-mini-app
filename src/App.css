@@ -1,0 +1,258 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.app {
+  min-height: 100vh;
+  padding: 16px;
+  padding-bottom: 80px;
+}
+
+.countdown {
+  border-radius: 16px;
+  padding: 24px;
+  margin-bottom: 24px;
+  text-align: center;
+}
+
+.countdown h2 {
+  font-size: 12px;
+  text-transform: uppercase;
+  opacity: 0.7;
+  margin-bottom: 8px;
+}
+
+.countdown .dest {
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 16px;
+}
+
+.countdown .days {
+  font-size: 48px;
+  font-weight: bold;
+  margin-bottom: 8px;
+}
+
+.countdown .dates {
+  opacity: 0.7;
+  font-size: 14px;
+}
+
+.tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.tabs button {
+  flex: 1;
+  padding: 12px;
+  background: transparent;
+  border: none;
+  border-bottom: 3px solid transparent;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.tabs button.active {
+  border-bottom-color: #3390ec;
+}
+
+.trips {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.trip-card {
+  border-radius: 12px;
+  padding: 16px;
+  cursor: pointer;
+}
+
+.trip-card:active {
+  transform: scale(0.98);
+}
+
+.trip-card h3 {
+  font-size: 20px;
+  margin-bottom: 8px;
+}
+
+.trip-dates {
+  font-size: 14px;
+  opacity: 0.7;
+  margin-bottom: 8px;
+}
+
+.trip-card p {
+  font-size: 14px;
+  margin-bottom: 12px;
+  opacity: 0.8;
+}
+
+.stats {
+  display: flex;
+  gap: 16px;
+  font-size: 14px;
+  opacity: 0.7;
+}
+
+.empty {
+  text-align: center;
+  padding: 48px 16px;
+  opacity: 0.5;
+}
+
+.fab {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  border: none;
+  font-size: 32px;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.form-container, .detail {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.header h2 {
+  flex: 1;
+  text-align: center;
+}
+
+.back, .delete {
+  background: transparent;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+  padding: 8px;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+form div {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+label {
+  font-size: 14px;
+  font-weight: 600;
+  opacity: 0.8;
+}
+
+input, textarea {
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-size: 16px;
+  font-family: inherit;
+}
+
+textarea {
+  min-height: 100px;
+}
+
+button[type="submit"] {
+  padding: 14px;
+  border-radius: 8px;
+  border: none;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 8px;
+}
+
+.content {
+  padding-bottom: 24px;
+}
+
+.info {
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.info h3 {
+  font-size: 16px;
+  margin-bottom: 12px;
+  opacity: 0.7;
+}
+
+.info p {
+  margin-bottom: 8px;
+}
+
+.flight {
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.flight h3 {
+  font-size: 18px;
+  margin-bottom: 16px;
+}
+
+.route {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  text-align: center;
+}
+
+.route > div {
+  flex: 1;
+}
+
+.code {
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 4px;
+}
+
+.itinerary-item {
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 12px;
+}
+
+.itinerary-item h3 {
+  font-size: 16px;
+  margin-bottom: 8px;
+}
+
+.itinerary-item div {
+  font-size: 14px;
+  opacity: 0.7;
+  margin-bottom: 8px;
+}
+
+.itinerary-item p {
+  font-size: 14px;
+  opacity: 0.8;
+  margin-bottom: 4px;
+}

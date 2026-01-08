@@ -1,0 +1,16 @@
+# Dependency directories
+node_modules/
+
+# dotenv environment variables file
+.env
+.env.*
+
+# Builds
+dist
+
+# mac stuff
+.DS_Store
+
+# vs code config
+.vscode
+tmp/
