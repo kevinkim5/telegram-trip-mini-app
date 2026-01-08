@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { Clock, MapPin } from "lucide-react";
 import { Trip } from "../types";
-import { getDaysUntil, formatDate } from "../utils";
+import { getDaysUntil } from "../utils";
 
 interface CountdownProps {
   trip: Trip;
