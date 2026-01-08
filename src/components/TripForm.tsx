@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ArrowLeft, Plus, X, RefreshCw } from 'lucide-react';
 import { useTripStore } from '../store';
 import { Trip, Flight, ItineraryItem } from '../types';
@@ -7,7 +7,7 @@ import { generateId, isUpcoming } from '../utils';
 export const TripForm: React.FC = () => {
   const { selectedTrip, setView, addTrip, updateTrip, isLoading } = useTripStore();
   const isEdit = selectedTrip !== null;
-  
+
   const [formData, setFormData] = useState<Omit<Trip, 'id' | 'status'>>({
     destination: selectedTrip?.destination || '',
     startDate: selectedTrip?.startDate || '',
@@ -17,22 +17,49 @@ export const TripForm: React.FC = () => {
     flights: selectedTrip?.flights || [],
     itinerary: selectedTrip?.itinerary || []
   });
-  
+
+  // Reset form data when selectedTrip changes (switching between add/edit)
+  useEffect(() => {
+    if (selectedTrip) {
+      // Editing existing trip
+      setFormData({
+        destination: selectedTrip.destination || '',
+        startDate: selectedTrip.startDate || '',
+        endDate: selectedTrip.endDate || '',
+        imageUrl: selectedTrip.imageUrl || '',
+        description: selectedTrip.description || '',
+        flights: selectedTrip.flights || [],
+        itinerary: selectedTrip.itinerary || []
+      });
+    } else {
+      // Adding new trip - reset to empty
+      setFormData({
+        destination: '',
+        startDate: '',
+        endDate: '',
+        imageUrl: '',
+        description: '',
+        flights: [],
+        itinerary: []
+      });
+    }
+  }, [selectedTrip]);
+
   const [showFlightForm, setShowFlightForm] = useState(false);
   const [showItineraryForm, setShowItineraryForm] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!formData.destination || !formData.startDate || !formData.endDate) {
       alert('Please fill in all required fields');
       return;
     }
-    
+
     setIsSaving(true);
     const status = isUpcoming(formData.endDate) ? 'upcoming' : 'past';
-    
+
     try {
       if (isEdit && selectedTrip) {
         await updateTrip(selectedTrip.id, {
@@ -47,7 +74,7 @@ export const TripForm: React.FC = () => {
           status
         });
       }
-      
+
       setView('list');
     } catch (error) {
       console.error('Error saving trip:', error);
@@ -56,14 +83,14 @@ export const TripForm: React.FC = () => {
       setIsSaving(false);
     }
   };
-  
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormData(prev => ({
       ...prev,
       [e.target.name]: e.target.value
     }));
   };
-  
+
   const addFlight = (flight: Flight) => {
     setFormData(prev => ({
       ...prev,
@@ -71,14 +98,14 @@ export const TripForm: React.FC = () => {
     }));
     setShowFlightForm(false);
   };
-  
+
   const removeFlight = (id: string) => {
     setFormData(prev => ({
       ...prev,
       flights: prev.flights.filter(f => f.id !== id)
     }));
   };
-  
+
   const addItineraryItem = (item: ItineraryItem) => {
     setFormData(prev => ({
       ...prev,
@@ -86,14 +113,14 @@ export const TripForm: React.FC = () => {
     }));
     setShowItineraryForm(false);
   };
-  
+
   const removeItineraryItem = (id: string) => {
     setFormData(prev => ({
       ...prev,
       itinerary: prev.itinerary.filter(i => i.id !== id)
     }));
   };
-  
+
   return (
     <div className="min-h-screen bg-gray-50 pb-20">
       <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-6">
@@ -107,11 +134,11 @@ export const TripForm: React.FC = () => {
           <h1 className="text-2xl font-bold">{isEdit ? 'Edit Trip' : 'New Trip'}</h1>
         </div>
       </div>
-      
+
       <form onSubmit={handleSubmit} className="px-4 py-6">
         <div className="bg-white rounded-lg shadow-md p-6 mb-6">
           <h2 className="text-lg font-bold text-gray-800 mb-4">Basic Information</h2>
-          
+
           <div className="mb-4">
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Destination *
@@ -126,7 +153,7 @@ export const TripForm: React.FC = () => {
               required
             />
           </div>
-          
+
           <div className="grid grid-cols-2 gap-4 mb-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -141,7 +168,7 @@ export const TripForm: React.FC = () => {
                 required
               />
             </div>
-            
+
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 End Date *
@@ -156,7 +183,7 @@ export const TripForm: React.FC = () => {
               />
             </div>
           </div>
-          
+
           <div className="mb-4">
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Image URL
@@ -170,7 +197,7 @@ export const TripForm: React.FC = () => {
               placeholder="https://example.com/image.jpg"
             />
           </div>
-          
+
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Description
@@ -185,7 +212,7 @@ export const TripForm: React.FC = () => {
             />
           </div>
         </div>
-        
+
         <div className="bg-white rounded-lg shadow-md p-6 mb-6">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-bold text-gray-800">Flights</h2>
@@ -198,7 +225,7 @@ export const TripForm: React.FC = () => {
               Add Flight
             </button>
           </div>
-          
+
           {formData.flights.length === 0 ? (
             <p className="text-gray-500 text-sm">No flights added yet</p>
           ) : (
@@ -221,7 +248,7 @@ export const TripForm: React.FC = () => {
             </div>
           )}
         </div>
-        
+
         <div className="bg-white rounded-lg shadow-md p-6 mb-6">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-bold text-gray-800">Itinerary</h2>
@@ -234,7 +261,7 @@ export const TripForm: React.FC = () => {
               Add Item
             </button>
           </div>
-          
+
           {formData.itinerary.length === 0 ? (
             <p className="text-gray-500 text-sm">No itinerary items yet</p>
           ) : (
@@ -257,7 +284,7 @@ export const TripForm: React.FC = () => {
             </div>
           )}
         </div>
-        
+
         <button
           type="submit"
           disabled={isSaving || isLoading}
@@ -273,14 +300,14 @@ export const TripForm: React.FC = () => {
           )}
         </button>
       </form>
-      
+
       {showFlightForm && (
         <FlightFormModal
           onClose={() => setShowFlightForm(false)}
           onAdd={addFlight}
         />
       )}
-      
+
       {showItineraryForm && (
         <ItineraryFormModal
           onClose={() => setShowItineraryForm(false)}
@@ -307,17 +334,17 @@ const FlightFormModal: React.FC<FlightFormModalProps> = ({ onClose, onAdd }) => 
     seat: '',
     bookingReference: ''
   });
-  
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!flight.airline || !flight.flightNumber || !flight.departure.code || !flight.arrival.code) {
       alert('Please fill in all required fields');
       return;
     }
-    
+
     onAdd({ ...flight, id: generateId() });
   };
-  
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-lg max-w-lg w-full max-h-[90vh] overflow-y-auto">
@@ -328,7 +355,7 @@ const FlightFormModal: React.FC<FlightFormModalProps> = ({ onClose, onAdd }) => 
               <X className="w-6 h-6" />
             </button>
           </div>
-          
+
           <form onSubmit={handleSubmit}>
             <div className="mb-4">
               <label className="block text-sm font-medium text-gray-700 mb-2">Airline *</label>
@@ -341,7 +368,7 @@ const FlightFormModal: React.FC<FlightFormModalProps> = ({ onClose, onAdd }) => 
                 required
               />
             </div>
-            
+
             <div className="mb-4">
               <label className="block text-sm font-medium text-gray-700 mb-2">Flight Number *</label>
               <input
@@ -353,7 +380,7 @@ const FlightFormModal: React.FC<FlightFormModalProps> = ({ onClose, onAdd }) => 
                 required
               />
             </div>
-            
+
             <div className="mb-4">
               <h4 className="font-medium mb-2">Departure</h4>
               <div className="grid grid-cols-2 gap-2 mb-2">
@@ -380,7 +407,7 @@ const FlightFormModal: React.FC<FlightFormModalProps> = ({ onClose, onAdd }) => 
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg"
               />
             </div>
-            
+
             <div className="mb-4">
               <h4 className="font-medium mb-2">Arrival</h4>
               <div className="grid grid-cols-2 gap-2 mb-2">
@@ -407,7 +434,7 @@ const FlightFormModal: React.FC<FlightFormModalProps> = ({ onClose, onAdd }) => 
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg"
               />
             </div>
-            
+
             <div className="grid grid-cols-3 gap-2 mb-4">
               <input
                 type="text"
@@ -431,7 +458,7 @@ const FlightFormModal: React.FC<FlightFormModalProps> = ({ onClose, onAdd }) => 
                 placeholder="Seat"
               />
             </div>
-            
+
             <div className="mb-4">
               <label className="block text-sm font-medium text-gray-700 mb-2">Booking Reference</label>
               <input
@@ -442,7 +469,7 @@ const FlightFormModal: React.FC<FlightFormModalProps> = ({ onClose, onAdd }) => 
                 placeholder="e.g., ABC123"
               />
             </div>
-            
+
             <button
               type="submit"
               className="w-full bg-blue-600 text-white py-2 rounded-lg font-semibold hover:bg-blue-700"
@@ -470,17 +497,17 @@ const ItineraryFormModal: React.FC<ItineraryFormModalProps> = ({ onClose, onAdd 
     location: '',
     type: 'activity'
   });
-  
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!item.date || !item.title) {
       alert('Please fill in all required fields');
       return;
     }
-    
+
     onAdd({ ...item, id: generateId() });
   };
-  
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-lg max-w-lg w-full max-h-[90vh] overflow-y-auto">
@@ -491,7 +518,7 @@ const ItineraryFormModal: React.FC<ItineraryFormModalProps> = ({ onClose, onAdd 
               <X className="w-6 h-6" />
             </button>
           </div>
-          
+
           <form onSubmit={handleSubmit}>
             <div className="mb-4">
               <label className="block text-sm font-medium text-gray-700 mb-2">Title *</label>
@@ -504,7 +531,7 @@ const ItineraryFormModal: React.FC<ItineraryFormModalProps> = ({ onClose, onAdd 
                 required
               />
             </div>
-            
+
             <div className="grid grid-cols-2 gap-4 mb-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Date *</label>
@@ -516,7 +543,7 @@ const ItineraryFormModal: React.FC<ItineraryFormModalProps> = ({ onClose, onAdd 
                   required
                 />
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Time</label>
                 <input
@@ -527,7 +554,7 @@ const ItineraryFormModal: React.FC<ItineraryFormModalProps> = ({ onClose, onAdd 
                 />
               </div>
             </div>
-            
+
             <div className="mb-4">
               <label className="block text-sm font-medium text-gray-700 mb-2">Type</label>
               <select
@@ -542,7 +569,7 @@ const ItineraryFormModal: React.FC<ItineraryFormModalProps> = ({ onClose, onAdd 
                 <option value="other">Other</option>
               </select>
             </div>
-            
+
             <div className="mb-4">
               <label className="block text-sm font-medium text-gray-700 mb-2">Location</label>
               <input
@@ -553,7 +580,7 @@ const ItineraryFormModal: React.FC<ItineraryFormModalProps> = ({ onClose, onAdd 
                 placeholder="e.g., Asakusa, Tokyo"
               />
             </div>
-            
+
             <div className="mb-4">
               <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
               <textarea
@@ -564,7 +591,7 @@ const ItineraryFormModal: React.FC<ItineraryFormModalProps> = ({ onClose, onAdd 
                 placeholder="Additional details..."
               />
             </div>
-            
+
             <button
               type="submit"
               className="w-full bg-blue-600 text-white py-2 rounded-lg font-semibold hover:bg-blue-700"

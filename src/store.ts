@@ -77,12 +77,15 @@ export const useTripStore = create<TripStore>((set, get) => ({
       return;
     }
 
+    console.log("Subscribing to trips for groupId:", groupId);
+
     // Unsubscribe from previous subscription if exists
     if (unsubscribe) {
       unsubscribe();
     }
 
     const unsubscribeFn = subscribeToTrips(groupId, (trips) => {
+      console.log(`Received ${trips.length} trips for groupId: ${groupId}`);
       const updatedTrips = trips.map(
         (trip) =>
           ({
@@ -100,9 +103,11 @@ export const useTripStore = create<TripStore>((set, get) => ({
     const { groupId } = get();
     if (!groupId) {
       console.error("Cannot add trip: groupId not set");
+      alert("Error: Cannot determine group context. Please try again.");
       return;
     }
 
+    console.log("Adding trip with groupId:", groupId);
     set({ isLoading: true });
     try {
       const tripWithGroup = { ...trip, groupId };
@@ -111,6 +116,7 @@ export const useTripStore = create<TripStore>((set, get) => ({
       set({ isLoading: false });
     } catch (error) {
       console.error("Error adding trip:", error);
+      alert("Failed to add trip. Please try again.");
       set({ isLoading: false });
     }
   },
@@ -151,6 +157,11 @@ export const useTripStore = create<TripStore>((set, get) => ({
   },
 
   setView: (view) => {
-    set({ view });
+    // Clear selectedTrip when switching to "add" view to ensure we're creating a new trip
+    if (view === "add") {
+      set({ view, selectedTrip: null });
+    } else {
+      set({ view });
+    }
   },
 }));
