@@ -82,7 +82,7 @@ export const TripList: React.FC = () => {
         </div>
       </div>
 
-      <div className="px-4 -mt-6 space-y-6">
+      <div className="px-4 pt-6 space-y-6">
         {isLoading && trips.length === 0 && (
           <div className="bg-slate-900/70 border border-slate-800 rounded-2xl p-6 text-center">
             <RefreshCw className="w-7 h-7 animate-spin mx-auto mb-2 text-sky-400" />
