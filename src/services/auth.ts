@@ -1,6 +1,5 @@
 import { signInAnonymously, User } from "firebase/auth";
 import { auth } from "../../firebase.config";
-import { getUserId } from "../utils/telegram";
 
 /**
  * Authenticate user with Firebase using Telegram user ID

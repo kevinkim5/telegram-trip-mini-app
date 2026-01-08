@@ -54,7 +54,6 @@ export const useTripStore = create<TripStore>((set, get) => ({
     set({ isLoading: true });
     try {
       const trips = await loadTrips(groupId);
-      const now = new Date();
 
       const updatedTrips = trips.map(
         (trip) =>
@@ -83,7 +82,6 @@ export const useTripStore = create<TripStore>((set, get) => ({
       unsubscribe();
     }
 
-    const now = new Date();
     const unsubscribeFn = subscribeToTrips(groupId, (trips) => {
       const updatedTrips = trips.map(
         (trip) =>

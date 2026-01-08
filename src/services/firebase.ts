@@ -13,22 +13,9 @@ import {
   DocumentData,
 } from "firebase/firestore";
 import { db } from "../../firebase.config";
-import { Trip, Flight, ItineraryItem } from "../types";
+import { Trip } from "../types";
 
 const TRIPS_COLLECTION = "trips";
-
-/**
- * Convert Firestore timestamp to ISO string
- */
-function timestampToISO(timestamp: any): string {
-  if (timestamp?.toDate) {
-    return timestamp.toDate().toISOString();
-  }
-  if (timestamp instanceof Timestamp) {
-    return timestamp.toDate().toISOString();
-  }
-  return timestamp;
-}
 
 /**
  * Convert trip data from Firestore format to app format
