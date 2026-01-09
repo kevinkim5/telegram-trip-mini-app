@@ -1,21 +1,9 @@
 export interface Flight {
   id: string;
-  airline: string;
   flightNumber: string;
-  departure: {
-    airport: string;
-    code: string;
-    dateTime: string;
-  };
-  arrival: {
-    airport: string;
-    code: string;
-    dateTime: string;
-  };
-  terminal?: string;
-  gate?: string;
-  seat?: string;
+  date: string;
   bookingReference?: string;
+  type: "departing" | "returning" | "additional";
 }
 
 export interface ItineraryItem {

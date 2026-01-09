@@ -9,7 +9,8 @@ import {
   List,
 } from "lucide-react";
 import { useTripStore } from "../store";
-import { formatDate, formatDateTime } from "../utils";
+import { formatDate } from "../utils";
+import { Flight } from "../types";
 
 export const TripDetail: React.FC = () => {
   const { selectedTrip, setView, deleteTrip } = useTripStore();
@@ -118,64 +119,36 @@ export const TripDetail: React.FC = () => {
               Flights
             </h2>
 
-            <div className="space-y-4">
-              {selectedTrip.flights.map((flight) => (
-                <div
-                  key={flight.id}
-                  className="bg-slate-800/50 border border-slate-700 rounded-xl p-4"
-                >
-                  <div className="flex items-center justify-between mb-3">
-                    <span className="font-semibold text-slate-50">
-                      {flight.airline} {flight.flightNumber}
-                    </span>
-                    {flight.bookingReference && (
-                      <span className="text-xs bg-slate-700 text-slate-300 px-2 py-1 rounded-lg">
-                        {flight.bookingReference}
-                      </span>
+            <div className="space-y-3">
+              {(() => {
+                const departing = selectedTrip.flights.find(
+                  (f) => f.type === "departing"
+                );
+                const returning = selectedTrip.flights.find(
+                  (f) => f.type === "returning"
+                );
+                const additional = selectedTrip.flights.filter(
+                  (f) => f.type === "additional"
+                );
+
+                return (
+                  <>
+                    {departing && (
+                      <FlightCard flight={departing} label="Departing" />
                     )}
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <div className="text-xs text-slate-400 mb-1">
-                        Departure
-                      </div>
-                      <div className="font-medium text-slate-50">
-                        {flight.departure.code}
-                      </div>
-                      <div className="text-sm text-slate-300">
-                        {flight.departure.airport}
-                      </div>
-                      <div className="text-sm text-slate-400">
-                        {formatDateTime(flight.departure.dateTime)}
-                      </div>
-                    </div>
-
-                    <div>
-                      <div className="text-xs text-slate-400 mb-1">Arrival</div>
-                      <div className="font-medium text-slate-50">
-                        {flight.arrival.code}
-                      </div>
-                      <div className="text-sm text-slate-300">
-                        {flight.arrival.airport}
-                      </div>
-                      <div className="text-sm text-slate-400">
-                        {formatDateTime(flight.arrival.dateTime)}
-                      </div>
-                    </div>
-                  </div>
-
-                  {(flight.terminal || flight.gate || flight.seat) && (
-                    <div className="mt-3 pt-3 border-t border-slate-700 flex gap-4 text-sm text-slate-400">
-                      {flight.terminal && (
-                        <span>Terminal: {flight.terminal}</span>
-                      )}
-                      {flight.gate && <span>Gate: {flight.gate}</span>}
-                      {flight.seat && <span>Seat: {flight.seat}</span>}
-                    </div>
-                  )}
-                </div>
-              ))}
+                    {additional.map((flight) => (
+                      <FlightCard
+                        key={flight.id}
+                        flight={flight}
+                        label="Additional"
+                      />
+                    ))}
+                    {returning && (
+                      <FlightCard flight={returning} label="Returning" />
+                    )}
+                  </>
+                );
+              })()}
             </div>
           </div>
         )}
@@ -229,6 +202,39 @@ export const TripDetail: React.FC = () => {
             </div>
           </div>
         )}
+      </div>
+    </div>
+  );
+};
+
+interface FlightCardProps {
+  flight: Flight;
+  label: string;
+}
+
+const FlightCard: React.FC<FlightCardProps> = ({ flight, label }) => {
+  return (
+    <div className="bg-slate-800/50 border border-slate-700 rounded-xl p-4">
+      <div className="flex items-center justify-between mb-2">
+        <span className="text-xs font-medium text-slate-400 uppercase">
+          {label}
+        </span>
+        {flight.bookingReference && (
+          <span className="text-xs bg-slate-700 text-slate-300 px-2 py-1 rounded-lg">
+            {flight.bookingReference}
+          </span>
+        )}
+      </div>
+      <div className="font-semibold text-slate-50 mb-1">
+        {flight.flightNumber}
+      </div>
+      <div className="text-sm text-slate-400">
+        {new Date(flight.date).toLocaleDateString("en-US", {
+          weekday: "long",
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+        })}
       </div>
     </div>
   );

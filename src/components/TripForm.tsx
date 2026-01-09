@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { ArrowLeft, Plus, X, RefreshCw } from "lucide-react";
+import { ArrowLeft, Plus, X, RefreshCw, Edit2 } from "lucide-react";
 import { useTripStore } from "../store";
 import { Trip, Flight, ItineraryItem } from "../types";
 import { generateId, isUpcoming } from "../utils";
@@ -46,7 +46,6 @@ export const TripForm: React.FC = () => {
     }
   }, [selectedTrip]);
 
-  const [showFlightForm, setShowFlightForm] = useState(false);
   const [showItineraryForm, setShowItineraryForm] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
@@ -94,12 +93,43 @@ export const TripForm: React.FC = () => {
     }));
   };
 
-  const addFlight = (flight: Flight) => {
+  const getDepartingFlight = () => {
+    return formData.flights.find((f) => f.type === "departing");
+  };
+
+  const getReturningFlight = () => {
+    return formData.flights.find((f) => f.type === "returning");
+  };
+
+  const getAdditionalFlights = () => {
+    return formData.flights.filter((f) => f.type === "additional");
+  };
+
+  const setDepartingFlight = (flight: Flight | null) => {
+    setFormData((prev) => {
+      const otherFlights = prev.flights.filter((f) => f.type !== "departing");
+      return {
+        ...prev,
+        flights: flight ? [...otherFlights, flight] : otherFlights,
+      };
+    });
+  };
+
+  const setReturningFlight = (flight: Flight | null) => {
+    setFormData((prev) => {
+      const otherFlights = prev.flights.filter((f) => f.type !== "returning");
+      return {
+        ...prev,
+        flights: flight ? [...otherFlights, flight] : otherFlights,
+      };
+    });
+  };
+
+  const addAdditionalFlight = (flight: Flight) => {
     setFormData((prev) => ({
       ...prev,
       flights: [...prev.flights, flight],
     }));
-    setShowFlightForm(false);
   };
 
   const removeFlight = (id: string) => {
@@ -225,48 +255,84 @@ export const TripForm: React.FC = () => {
         </div>
 
         <div className="bg-slate-900/70 border border-slate-800 rounded-2xl shadow-xl p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-sm font-semibold uppercase tracking-wider text-slate-300">
-              Flights
-            </h2>
-            <button
-              type="button"
-              onClick={() => setShowFlightForm(true)}
-              className="inline-flex items-center gap-2 rounded-full bg-sky-500/20 hover:bg-sky-500/30 text-sky-300 px-3 py-1.5 text-xs font-medium transition-colors"
-            >
-              <Plus className="w-4 h-4" />
-              Add Flight
-            </button>
-          </div>
+          <h2 className="text-sm font-semibold uppercase tracking-wider text-slate-300 mb-6">
+            Flights
+          </h2>
 
-          {formData.flights.length === 0 ? (
-            <p className="text-slate-400 text-sm">No flights added yet</p>
-          ) : (
-            <div className="space-y-2">
-              {formData.flights.map((flight) => (
-                <div
-                  key={flight.id}
-                  className="flex items-center justify-between bg-slate-800/50 border border-slate-700 rounded-xl p-3"
-                >
-                  <div className="text-sm">
-                    <div className="font-medium text-slate-50">
-                      {flight.airline} {flight.flightNumber}
-                    </div>
-                    <div className="text-slate-400 text-xs">
-                      {flight.departure.code} → {flight.arrival.code}
-                    </div>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => removeFlight(flight.id)}
-                    className="text-red-400 hover:text-red-300 transition-colors p-1"
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
-                </div>
-              ))}
+          <div className="space-y-6">
+            {/* Departing Flight */}
+            <div>
+              <h3 className="text-xs font-medium text-slate-400 mb-3">
+                Departing Flight
+              </h3>
+              <FlightInput
+                flight={getDepartingFlight() || null}
+                onSave={(flight) => setDepartingFlight(flight)}
+                onRemove={() => setDepartingFlight(null)}
+                type="departing"
+              />
             </div>
-          )}
+
+            {/* Additional Flights */}
+            <div>
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-xs font-medium text-slate-400">
+                  Additional Flights
+                </h3>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const newFlight: Flight = {
+                      id: generateId(),
+                      flightNumber: "",
+                      date: "",
+                      type: "additional",
+                    };
+                    addAdditionalFlight(newFlight);
+                  }}
+                  className="inline-flex items-center gap-1 rounded-full bg-sky-500/20 hover:bg-sky-500/30 text-sky-300 px-2 py-1 text-xs font-medium transition-colors"
+                >
+                  <Plus className="w-3 h-3" />
+                  Add
+                </button>
+              </div>
+              {getAdditionalFlights().length === 0 ? (
+                <p className="text-slate-500 text-xs italic">
+                  No additional flights (for multi-city trips)
+                </p>
+              ) : (
+                <div className="space-y-3">
+                  {getAdditionalFlights().map((flight) => (
+                    <FlightInput
+                      key={flight.id}
+                      flight={flight}
+                      onSave={(updatedFlight) => {
+                        removeFlight(flight.id);
+                        if (updatedFlight) {
+                          addAdditionalFlight(updatedFlight);
+                        }
+                      }}
+                      onRemove={() => removeFlight(flight.id)}
+                      type="additional"
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Returning Flight */}
+            <div>
+              <h3 className="text-xs font-medium text-slate-400 mb-3">
+                Returning Flight
+              </h3>
+              <FlightInput
+                flight={getReturningFlight() || null}
+                onSave={(flight) => setReturningFlight(flight)}
+                onRemove={() => setReturningFlight(null)}
+                type="returning"
+              />
+            </div>
+          </div>
         </div>
 
         <div className="bg-slate-900/70 border border-slate-800 rounded-2xl shadow-xl p-6">
@@ -332,13 +398,6 @@ export const TripForm: React.FC = () => {
         </button>
       </form>
 
-      {showFlightForm && (
-        <FlightFormModal
-          onClose={() => setShowFlightForm(false)}
-          onAdd={addFlight}
-        />
-      )}
-
       {showItineraryForm && (
         <ItineraryFormModal
           onClose={() => setShowItineraryForm(false)}
@@ -349,235 +408,197 @@ export const TripForm: React.FC = () => {
   );
 };
 
-interface FlightFormModalProps {
-  onClose: () => void;
-  onAdd: (flight: Flight) => void;
+interface FlightInputProps {
+  flight: Flight | null;
+  onSave: (flight: Flight | null) => void;
+  onRemove: () => void;
+  type: "departing" | "returning" | "additional";
 }
 
-const FlightFormModal: React.FC<FlightFormModalProps> = ({
-  onClose,
-  onAdd,
+const FlightInput: React.FC<FlightInputProps> = ({
+  flight,
+  onSave,
+  onRemove,
+  type,
 }) => {
-  const [flight, setFlight] = useState<Omit<Flight, "id">>({
-    airline: "",
-    flightNumber: "",
-    departure: { airport: "", code: "", dateTime: "" },
-    arrival: { airport: "", code: "", dateTime: "" },
-    terminal: "",
-    gate: "",
-    seat: "",
-    bookingReference: "",
-  });
+  const [flightNumber, setFlightNumber] = useState(flight?.flightNumber || "");
+  const [date, setDate] = useState(flight?.date || "");
+  const [bookingReference, setBookingReference] = useState(
+    flight?.bookingReference || ""
+  );
+  const [isEditing, setIsEditing] = useState(!flight);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (
-      !flight.airline ||
-      !flight.flightNumber ||
-      !flight.departure.code ||
-      !flight.arrival.code
-    ) {
-      alert("Please fill in all required fields");
+  useEffect(() => {
+    if (flight) {
+      setFlightNumber(flight.flightNumber);
+      setDate(flight.date);
+      setBookingReference(flight.bookingReference || "");
+      setIsEditing(false);
+    } else {
+      setFlightNumber("");
+      setDate("");
+      setBookingReference("");
+      setIsEditing(true);
+    }
+  }, [flight]);
+
+  const handleSave = () => {
+    if (!flightNumber.trim() || !date.trim()) {
+      alert("Please fill in flight number and date");
       return;
     }
 
-    onAdd({ ...flight, id: generateId() });
+    const savedFlight: Flight = {
+      id: flight?.id || generateId(),
+      flightNumber: flightNumber.trim(),
+      date: date,
+      bookingReference: bookingReference.trim() || undefined,
+      type,
+    };
+
+    onSave(savedFlight);
+    setIsEditing(false);
   };
 
-  return (
-    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-slate-900 border border-slate-800 rounded-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto shadow-2xl">
-        <div className="p-6">
-          <div className="flex items-center justify-between mb-6">
-            <h3 className="text-xl font-semibold text-slate-50">Add Flight</h3>
-            <button
-              onClick={onClose}
-              className="p-1 rounded-lg hover:bg-slate-800 transition-colors"
-            >
-              <X className="w-5 h-5 text-slate-400" />
-            </button>
+  const handleCancel = () => {
+    if (flight) {
+      setFlightNumber(flight.flightNumber);
+      setDate(flight.date);
+      setBookingReference(flight.bookingReference || "");
+      setIsEditing(false);
+    } else {
+      onRemove();
+    }
+  };
+
+  if (!isEditing && flight) {
+    return (
+      <div className="flex items-center justify-between bg-slate-800/50 border border-slate-700 rounded-xl p-3">
+        <div className="text-sm">
+          <div className="flex items-center gap-2 mb-1">
+            <span className="text-xs font-medium text-slate-400 uppercase">
+              {type === "departing"
+                ? "Departing"
+                : type === "returning"
+                  ? "Returning"
+                  : "Additional"}
+            </span>
+            {bookingReference && (
+              <span className="text-xs bg-slate-700 text-slate-300 px-2 py-0.5 rounded">
+                {bookingReference}
+              </span>
+            )}
           </div>
-
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label className="block text-xs font-medium text-slate-300 mb-2">
-                Airline *
-              </label>
-              <input
-                type="text"
-                value={flight.airline}
-                onChange={(e) =>
-                  setFlight((prev) => ({ ...prev, airline: e.target.value }))
-                }
-                className="w-full px-4 py-3 bg-slate-800/50 border border-slate-700 rounded-xl text-slate-50 placeholder:text-slate-500 focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-colors"
-                placeholder="e.g., Singapore Airlines"
-                required
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs font-medium text-slate-300 mb-2">
-                Flight Number *
-              </label>
-              <input
-                type="text"
-                value={flight.flightNumber}
-                onChange={(e) =>
-                  setFlight((prev) => ({
-                    ...prev,
-                    flightNumber: e.target.value,
-                  }))
-                }
-                className="w-full px-4 py-3 bg-slate-800/50 border border-slate-700 rounded-xl text-slate-50 placeholder:text-slate-500 focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-colors"
-                placeholder="e.g., SQ123"
-                required
-              />
-            </div>
-
-            <div>
-              <h4 className="text-sm font-medium text-slate-300 mb-2">
-                Departure
-              </h4>
-              <div className="grid grid-cols-2 gap-2 mb-2">
-                <input
-                  type="text"
-                  value={flight.departure.code}
-                  onChange={(e) =>
-                    setFlight((prev) => ({
-                      ...prev,
-                      departure: { ...prev.departure, code: e.target.value },
-                    }))
-                  }
-                  className="px-4 py-3 bg-slate-800/50 border border-slate-700 rounded-xl text-slate-50 placeholder:text-slate-500 focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-colors"
-                  placeholder="Code (SIN)"
-                  required
-                />
-                <input
-                  type="text"
-                  value={flight.departure.airport}
-                  onChange={(e) =>
-                    setFlight((prev) => ({
-                      ...prev,
-                      departure: { ...prev.departure, airport: e.target.value },
-                    }))
-                  }
-                  className="px-4 py-3 bg-slate-800/50 border border-slate-700 rounded-xl text-slate-50 placeholder:text-slate-500 focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-colors"
-                  placeholder="Airport"
-                />
-              </div>
-              <input
-                type="datetime-local"
-                value={flight.departure.dateTime}
-                onChange={(e) =>
-                  setFlight((prev) => ({
-                    ...prev,
-                    departure: { ...prev.departure, dateTime: e.target.value },
-                  }))
-                }
-                className="w-full px-4 py-3 bg-slate-800/50 border border-slate-700 rounded-xl text-slate-50 focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-colors"
-              />
-            </div>
-
-            <div>
-              <h4 className="text-sm font-medium text-slate-300 mb-2">
-                Arrival
-              </h4>
-              <div className="grid grid-cols-2 gap-2 mb-2">
-                <input
-                  type="text"
-                  value={flight.arrival.code}
-                  onChange={(e) =>
-                    setFlight((prev) => ({
-                      ...prev,
-                      arrival: { ...prev.arrival, code: e.target.value },
-                    }))
-                  }
-                  className="px-4 py-3 bg-slate-800/50 border border-slate-700 rounded-xl text-slate-50 placeholder:text-slate-500 focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-colors"
-                  placeholder="Code (NRT)"
-                  required
-                />
-                <input
-                  type="text"
-                  value={flight.arrival.airport}
-                  onChange={(e) =>
-                    setFlight((prev) => ({
-                      ...prev,
-                      arrival: { ...prev.arrival, airport: e.target.value },
-                    }))
-                  }
-                  className="px-4 py-3 bg-slate-800/50 border border-slate-700 rounded-xl text-slate-50 placeholder:text-slate-500 focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-colors"
-                  placeholder="Airport"
-                />
-              </div>
-              <input
-                type="datetime-local"
-                value={flight.arrival.dateTime}
-                onChange={(e) =>
-                  setFlight((prev) => ({
-                    ...prev,
-                    arrival: { ...prev.arrival, dateTime: e.target.value },
-                  }))
-                }
-                className="w-full px-4 py-3 bg-slate-800/50 border border-slate-700 rounded-xl text-slate-50 focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-colors"
-              />
-            </div>
-
-            <div className="grid grid-cols-3 gap-2">
-              <input
-                type="text"
-                value={flight.terminal}
-                onChange={(e) =>
-                  setFlight((prev) => ({ ...prev, terminal: e.target.value }))
-                }
-                className="px-4 py-3 bg-slate-800/50 border border-slate-700 rounded-xl text-slate-50 placeholder:text-slate-500 focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-colors"
-                placeholder="Terminal"
-              />
-              <input
-                type="text"
-                value={flight.gate}
-                onChange={(e) =>
-                  setFlight((prev) => ({ ...prev, gate: e.target.value }))
-                }
-                className="px-4 py-3 bg-slate-800/50 border border-slate-700 rounded-xl text-slate-50 placeholder:text-slate-500 focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-colors"
-                placeholder="Gate"
-              />
-              <input
-                type="text"
-                value={flight.seat}
-                onChange={(e) =>
-                  setFlight((prev) => ({ ...prev, seat: e.target.value }))
-                }
-                className="px-4 py-3 bg-slate-800/50 border border-slate-700 rounded-xl text-slate-50 placeholder:text-slate-500 focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-colors"
-                placeholder="Seat"
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs font-medium text-slate-300 mb-2">
-                Booking Reference
-              </label>
-              <input
-                type="text"
-                value={flight.bookingReference}
-                onChange={(e) =>
-                  setFlight((prev) => ({
-                    ...prev,
-                    bookingReference: e.target.value,
-                  }))
-                }
-                className="w-full px-4 py-3 bg-slate-800/50 border border-slate-700 rounded-xl text-slate-50 placeholder:text-slate-500 focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-colors"
-                placeholder="e.g., ABC123"
-              />
-            </div>
-
-            <button
-              type="submit"
-              className="w-full bg-sky-500 text-white py-3 rounded-xl font-semibold hover:bg-sky-600 transition-colors shadow-lg shadow-sky-900/50"
-            >
-              Add Flight
-            </button>
-          </form>
+          <div className="font-medium text-slate-50">
+            {flight.flightNumber}
+          </div>
+          <div className="text-slate-400 text-xs">
+            {new Date(flight.date).toLocaleDateString("en-US", {
+              weekday: "short",
+              year: "numeric",
+              month: "short",
+              day: "numeric",
+            })}
+          </div>
         </div>
+        <div className="flex gap-2">
+          <button
+            type="button"
+            onClick={() => setIsEditing(true)}
+            className="text-slate-400 hover:text-slate-300 transition-colors p-1"
+          >
+            <Edit2 className="w-4 h-4" />
+          </button>
+          <button
+            type="button"
+            onClick={onRemove}
+            className="text-red-400 hover:text-red-300 transition-colors p-1"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="bg-slate-800/50 border border-slate-700 rounded-xl p-4 space-y-3">
+      <div className="flex items-center justify-between mb-2">
+        <span className="text-xs font-medium text-slate-400 uppercase">
+          {type === "departing"
+            ? "Departing"
+            : type === "returning"
+              ? "Returning"
+              : "Additional"}
+        </span>
+        {flight && (
+          <button
+            type="button"
+            onClick={handleCancel}
+            className="text-slate-400 hover:text-slate-300 transition-colors"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        )}
+      </div>
+
+      <div>
+        <label className="block text-xs font-medium text-slate-300 mb-1">
+          Flight Number *
+        </label>
+        <input
+          type="text"
+          value={flightNumber}
+          onChange={(e) => setFlightNumber(e.target.value)}
+          className="w-full px-3 py-2 bg-slate-900/50 border border-slate-600 rounded-lg text-slate-50 placeholder:text-slate-500 focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-colors text-sm"
+          placeholder="e.g., SQ123"
+          required
+        />
+      </div>
+
+      <div>
+        <label className="block text-xs font-medium text-slate-300 mb-1">
+          Date *
+        </label>
+        <input
+          type="date"
+          value={date}
+          onChange={(e) => setDate(e.target.value)}
+          className="w-full px-3 py-2 bg-slate-900/50 border border-slate-600 rounded-lg text-slate-50 focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-colors text-sm"
+          required
+        />
+      </div>
+
+      <div>
+        <label className="block text-xs font-medium text-slate-300 mb-1">
+          Booking Reference
+        </label>
+        <input
+          type="text"
+          value={bookingReference}
+          onChange={(e) => setBookingReference(e.target.value)}
+          className="w-full px-3 py-2 bg-slate-900/50 border border-slate-600 rounded-lg text-slate-50 placeholder:text-slate-500 focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-colors text-sm"
+          placeholder="Optional"
+        />
+      </div>
+
+      <div className="flex gap-2 pt-2">
+        <button
+          type="button"
+          onClick={handleSave}
+          className="flex-1 bg-sky-500 text-white py-2 rounded-lg font-medium hover:bg-sky-600 transition-colors text-sm"
+        >
+          {flight ? "Update" : "Add"}
+        </button>
+        {flight && (
+          <button
+            type="button"
+            onClick={handleCancel}
+            className="px-4 py-2 bg-slate-700 text-slate-300 rounded-lg font-medium hover:bg-slate-600 transition-colors text-sm"
+          >
+            Cancel
+          </button>
+        )}
       </div>
     </div>
   );
