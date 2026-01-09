@@ -1,10 +1,10 @@
 # Trip Tracker - Telegram Mini App
 
-A powerful Telegram Mini App for tracking and planning trips with **cloud storage** and **group collaboration** features.
+A powerful Telegram Mini App for tracking and planning trips with **Firebase** and **group collaboration** features.
 
 ## 🌟 What Makes This Special
 
-### ☁️ **Firebase Cloud Storage**
+### ☁️ **Firebase Firestore**
 
 - All trip data stored in Firebase Firestore
 - Real-time synchronization across all group members
@@ -99,7 +99,6 @@ The built files will be in the `dist` directory.
 ### Prerequisites
 
 1. **Set up Firebase** (required):
-
    - Follow the complete guide in [FIREBASE_SETUP.md](./FIREBASE_SETUP.md)
    - Create a Firebase project
    - Enable Firestore and Anonymous Authentication
@@ -113,18 +112,15 @@ The built files will be in the `dist` directory.
 ### Deployment Steps
 
 1. **Configure Environment Variables:**
-
    - Copy `.env.example` to `.env`
    - Fill in your Firebase configuration values
 
 2. **Deploy to a hosting platform:**
-
    - Vercel (recommended): `vercel --prod`
    - Netlify: Connect your repo and add environment variables
    - GitHub Pages: See deployment docs
 
 3. **Update Telegram Bot:**
-
    - Get your deployment URL
    - Use `/newapp` or `/editapp` with @BotFather
    - Set the Mini App URL to your deployment
@@ -138,12 +134,10 @@ The built files will be in the `dist` directory.
 ### For Group Sharing
 
 1. **Enable group mode:**
-
    - `/setjoingroups` with @BotFather
    - Turn OFF "Group Privacy" in bot settings
 
 2. **Add bot to group:**
-
    - Create or open a Telegram group
    - Add your bot as a member
 
@@ -234,7 +228,11 @@ src/
 │   └── TripList.tsx    # Main trips list view
 ├── types.ts            # TypeScript interfaces
 ├── store.ts            # Zustand state management
-├── storage.ts          # Telegram Cloud Storage integration
+├── services/           # Firebase services
+│   ├── firebase.ts     # Firestore operations
+│   └── auth.ts         # Firebase authentication
+├── utils/              # Helper functions
+│   └── telegram.ts     # Telegram WebApp utilities
 ├── utils.ts            # Helper functions
 ├── App.tsx             # Main app component
 ├── main.tsx            # Entry point
@@ -243,20 +241,13 @@ src/
 
 ## Key Files
 
-- **storage.ts**: Telegram Cloud Storage integration with localStorage fallback
+- **services/firebase.ts**: Firebase Firestore operations for trips
+- **services/auth.ts**: Firebase authentication
 - **store.ts**: Global state management with async operations
 - **types.ts**: TypeScript type definitions for Trip, Flight, and ItineraryItem
 - **components/**: All React components with full TypeScript typing
 
 ## Development Notes
-
-### Testing Cloud Storage Locally
-
-Cloud Storage only works in production. During development:
-
-- The app automatically uses localStorage
-- Data won't sync between devices
-- Deploy to test cloud storage features
 
 ### Testing Group Sharing
 
@@ -324,9 +315,8 @@ Potential features to add:
 
 ### Where It's Stored
 
-- **Production**: Telegram Cloud Storage (encrypted by Telegram)
-- **Development**: Browser localStorage
-- **Backup**: localStorage (in production too, as fallback)
+- **Production**: Firebase Firestore (encrypted and secured by Firebase)
+- **Development**: Firebase Firestore (same as production, with development group ID)
 
 ### Who Can Access
 

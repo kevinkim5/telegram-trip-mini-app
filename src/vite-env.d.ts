@@ -12,3 +12,20 @@ interface ImportMetaEnv {
 interface ImportMeta {
   readonly env: ImportMetaEnv;
 }
+
+// Telegram WebApp types
+declare global {
+  interface Window {
+    Telegram?: {
+      WebApp: {
+        version?: string;
+        initData?: string;
+        ready?: () => void;
+        expand?: () => void;
+        close?: () => void;
+      };
+    };
+  }
+}
+
+export {};
