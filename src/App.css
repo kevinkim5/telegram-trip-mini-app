@@ -121,7 +121,8 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
-.form-container, .detail {
+.form-container,
+.detail {
   max-width: 600px;
   margin: 0 auto;
 }
@@ -138,7 +139,8 @@
   text-align: center;
 }
 
-.back, .delete {
+.back,
+.delete {
   background: transparent;
   border: none;
   font-size: 16px;
@@ -164,7 +166,8 @@ label {
   opacity: 0.8;
 }
 
-input, textarea {
+input,
+textarea {
   padding: 12px;
   border-radius: 8px;
   border: 1px solid #ccc;

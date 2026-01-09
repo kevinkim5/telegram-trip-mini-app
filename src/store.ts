@@ -60,7 +60,7 @@ export const useTripStore = create<TripStore>((set, get) => ({
           ({
             ...trip,
             status: isPast(parseISO(trip.endDate)) ? "past" : "upcoming",
-          } as Trip)
+          }) as Trip
       );
 
       set({ trips: updatedTrips, isLoading: false });
@@ -91,7 +91,7 @@ export const useTripStore = create<TripStore>((set, get) => ({
           ({
             ...trip,
             status: isPast(parseISO(trip.endDate)) ? "past" : "upcoming",
-          } as Trip)
+          }) as Trip
       );
       set({ trips: updatedTrips, isLoading: false });
     });
