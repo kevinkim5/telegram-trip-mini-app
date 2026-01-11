@@ -471,6 +471,20 @@ const FlightInput: React.FC<FlightInputProps> = ({
     }
   };
 
+  const formatFlightDate = (dateString: string): string => {
+    if (!dateString) return "Date not set";
+    try {
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) return dateString;
+      const year = date.getFullYear();
+      const month = date.toLocaleDateString("en-US", { month: "short" });
+      const day = date.getDate();
+      return `${year} ${month} ${day}`;
+    } catch {
+      return dateString;
+    }
+  };
+
   if (!isEditing && flight) {
     return (
       <div className="flex items-center justify-between bg-slate-800/50 border border-slate-700 rounded-xl p-3">
@@ -490,15 +504,10 @@ const FlightInput: React.FC<FlightInputProps> = ({
             )}
           </div>
           <div className="font-medium text-slate-50">
-            {flight.flightNumber}
+            {flight.flightNumber || "Flight number not set"}
           </div>
           <div className="text-slate-400 text-xs">
-            {new Date(flight.date).toLocaleDateString("en-US", {
-              weekday: "short",
-              year: "numeric",
-              month: "short",
-              day: "numeric",
-            })}
+            {formatFlightDate(flight.date)}
           </div>
         </div>
         <div className="flex gap-2">
